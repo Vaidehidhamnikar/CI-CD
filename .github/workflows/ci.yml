@@ -107,10 +107,15 @@ jobs:
           SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        # run: |
+        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
+        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
+        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
+        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+
+
         run: |
-          snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
-          snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
-          snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
-          snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
-
-
+            snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
+            snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
+            snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
+            snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
