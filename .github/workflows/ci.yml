@@ -50,70 +50,128 @@
 
 
 
-name: Calculator App CI/CD to Snowflake
+# name: Calculator App CI/CD to Snowflake
+
+# on:
+#   push:
+#     branches: [ "main" ]
+#   workflow_dispatch:
+
+# jobs:
+#   build-and-push:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+
+#       - name: Set Version Tag
+#         id: vars
+#         run: |
+#           VERSION_TAG="v${GITHUB_RUN_NUMBER}"
+#           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+#           echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
+
+#       - name: Build Docker Image
+#         run: |
+#           echo "Building image: $IMAGE_NAME"
+#           docker build --platform=linux/amd64 -t $IMAGE_NAME .
+
+#       - name: Docker Login to Snowflake
+#         run: |
+#           echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
+#           docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
+#           -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
+
+#       - name: Tag and Push Docker Image
+#         run: |
+#           REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
+#           REPO_PATH="dash_db/dash_schema/image_repo_test" # Update with your DB/Schema/Stage
+#           FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
+
+#           echo "Tagging image: $FULL_TAG"
+#           docker tag $IMAGE_NAME $FULL_TAG
+#           echo "Pushing image: $FULL_TAG"
+#           docker push $FULL_TAG
+
+#     #   - name: Install SnowSQL
+#     #     run: |
+#     #       sudo apt-get update
+#     #       sudo apt-get install -y unzip curl
+#     #       curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+#     #       bash snowsql-1.2.24-linux_x86_64.bash
+#     #       echo "$HOME/bin" >> $GITHUB_PATH
+
+#       - name: Run Snowflake Commands
+#         env:
+#           SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+#           SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER }}
+#           SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+#         # run: |
+#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
+#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
+#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
+#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+
+
+#         run: |
+#             snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
+#             snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
+#             snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
+#             snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+
+
+
+
+
+name: Snowflake CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build-and-push:
+  deploy-to-snowflake:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set Version Tag
-        id: vars
+      - name: Setup Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v1.5
+        with:
+          cli-version: "latest"
+          default-config-file-path: "config.toml"
+
+      - name: Check if Snowflake is reachable
         run: |
-          VERSION_TAG="v${GITHUB_RUN_NUMBER}"
-          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
-          echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
+          curl -I https://kcb69289.us-west-2.snowflakecomputing.com || true
 
-      - name: Build Docker Image
-        run: |
-          echo "Building image: $IMAGE_NAME"
-          docker build --platform=linux/amd64 -t $IMAGE_NAME .
-
-      - name: Docker Login to Snowflake
-        run: |
-          echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
-          docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
-          -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
-
-      - name: Tag and Push Docker Image
-        run: |
-          REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
-          REPO_PATH="dash_db/dash_schema/image_repo_test" # Update with your DB/Schema/Stage
-          FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
-
-          echo "Tagging image: $FULL_TAG"
-          docker tag $IMAGE_NAME $FULL_TAG
-          echo "Pushing image: $FULL_TAG"
-          docker push $FULL_TAG
-
-    #   - name: Install SnowSQL
-    #     run: |
-    #       sudo apt-get update
-    #       sudo apt-get install -y unzip curl
-    #       curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
-    #       bash snowsql-1.2.24-linux_x86_64.bash
-    #       echo "$HOME/bin" >> $GITHUB_PATH
-
-      - name: Run Snowflake Commands
+      - name: Test Snowflake Connection
         env:
-          SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-        # run: |
-        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
-        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
-        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
-        #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER: VAIDEHI
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT: kcb69289.us-west-2
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE: ACCOUNTADMIN
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE: dash_s
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE: dash_db
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA: dash_schema
+        run: |
+          snow --version
+          snow connection test --debug
 
-
+      - name: Deploy to Snowflake
+        env:
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER: VAIDEHI
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT: kcb69289.us-west-2
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE: ACCOUNTADMIN
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE: dash_s
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE: dash_db
+          SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA: dash_schema
         run: |
             snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
             snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
