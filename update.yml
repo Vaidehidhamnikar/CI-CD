@@ -1,0 +1,9 @@
+spec:
+  containers:
+    - name: calculator_app
+      image: /dash_db/dash_schema/image_repo_test/demo_ci_cd:2f4a1bc
+
+  endpoints:
+    - name: streamlit
+      port: 8501
+      public: true
