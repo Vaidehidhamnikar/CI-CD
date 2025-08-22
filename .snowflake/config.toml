@@ -1,0 +1,6 @@
+default_connection_name = "my_connection"
+
+[connections.my_connection]
+account = "kcb69289"
+user = "VAIDEHI"
+password = "Kasmodigital@123"
