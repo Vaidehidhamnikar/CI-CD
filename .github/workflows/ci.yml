@@ -18,28 +18,26 @@ jobs:
         run: |
           VERSION_TAG="v${GITHUB_RUN_NUMBER}"
           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
-          echo "IMAGE_NAME=calculator-app" >> $GITHUB_ENV
+          echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
 
       - name: Build Docker Image
         run: |
-          echo "Building image: $IMAGE_NAME:$VERSION_TAG"
-          docker build --platform=linux/amd64 -t $IMAGE_NAME:$VERSION_TAG .
+          echo "Building image: $IMAGE_NAME"
+          docker build --platform=linux/amd64 -t $IMAGE_NAME .
 
       - name: Docker Login to Snowflake
         run: |
           echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
           docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
-          -u "${{ secrets.SNOWFLAKE_DOCKER_USERNAME }}" --password-stdin
+          -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
 
       - name: Tag and Push Docker Image
         run: |
           REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
-          DB="DASH_DB"                  # your Snowflake database
-          SCHEMA="DASH_SCHEMA"          # your Snowflake schema
-          STAGE="IMAGE_REPO_TEST"       # your Snowflake stage
-          FULL_TAG="$REGISTRY/$DB/$SCHEMA/$STAGE/$IMAGE_NAME:$VERSION_TAG"
+          REPO_PATH="dash_db/dash_schema/image_repo_test" # Update with your DB/Schema/Stage
+          FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
 
           echo "Tagging image: $FULL_TAG"
-          docker tag $IMAGE_NAME:$VERSION_TAG $FULL_TAG
+          docker tag $IMAGE_NAME $FULL_TAG
           echo "Pushing image: $FULL_TAG"
           docker push $FULL_TAG
