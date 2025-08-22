@@ -28,7 +28,7 @@ jobs:
       - name: Docker Login to Snowflake
         run: |
           echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
-          docker login aqwmurr-ko43468.registry.snowflakecomputing.com \
+          docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
           -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
 
       - name: Tag and Push Docker Image
