@@ -167,24 +167,24 @@ jobs:
           echo "Pushing image: $FULL_TAG"
           docker push $FULL_TAG
 
-      - name: Setup Snowflake CLI
-        uses: snowflakedb/snowflake-cli-action@v1.5
-        with:
-          cli-version: "latest"
-          default-config-file-path: "config.toml"
+    #   - name: Setup Snowflake CLI
+    #     uses: snowflakedb/snowflake-cli-action@v1.5
+    #     with:
+    #       cli-version: "latest"
+    #       default-config-file-path: "config.toml"
 
-      - name: Check if Snowflake is reachable
-        run: |
-          curl -I https://kcb69289.us-west-2.snowflakecomputing.com || true
+    #   - name: Check if Snowflake is reachable
+    #     run: |
+    #       curl -I https://kcb69289.us-west-2.snowflakecomputing.com || true
 
     #   - name: Test Snowflake Connection
     #     run: |
     #       snow --version
     #       snow connection test --debug
 
-      - name: Deploy to Snowflake
-        run: |
-          snow sql -q "USE ROLE DFPCL_KASMO_DS; USE WAREHOUSE DFPCL_KASMO_WH;"
-          snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
-          snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db.dash_schema.image_repo_test SPECIFICATION_FILE = 'update.yaml';"
-          snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+    #   - name: Deploy to Snowflake
+    #     run: |
+    #       snow sql -q "USE ROLE DFPCL_KASMO_DS; USE WAREHOUSE DFPCL_KASMO_WH;"
+    #       snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
+    #       snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db.dash_schema.image_repo_test SPECIFICATION_FILE = 'update.yaml';"
+    #       snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
