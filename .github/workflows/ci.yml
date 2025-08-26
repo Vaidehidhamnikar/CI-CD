@@ -164,8 +164,6 @@
 #         #   snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
 
 
-
-
 name: Streamlit CDP CI/CD
 
 on:
@@ -202,7 +200,12 @@ jobs:
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/streamlit-snowflake:latest
           docker push $IMAGE_NAME
 
-      # 5. Deploy/alter Snowflake service
+      # 5. Install Snowflake Python dependencies
+      - name: Install Snowflake Python Connector
+        run: |
+          pip install snowflake-connector-python snowflake-snowpark-python
+
+      # 6. Deploy/alter Snowflake service
       - name: Deploy Snowflake Service
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -232,11 +235,11 @@ jobs:
           service_name = "STREAMLIT_APP"
           image_url = os.getenv("IMAGE_NAME")
 
-          # Try alter first, else create
           try:
-              cs.execute(f"ALTER SERVICE {service_name} SET IMAGE = '{image_url}'")
+              cs.execute(f"ALTER SERVICE {service_name} FROM SPECIFICATION $$ containers: - name: streamlit image: {image_url} args: ['streamlit','run','streamlit.py','--server.port','8501','--server.address','0.0.0.0'] endpoints: - name: httpendpoint port: 8501 public: true $$;")
               print("Service altered successfully.")
-          except:
+          except Exception as e:
+              print("ALTER failed:", e)
               cs.execute(f"""
                   CREATE SERVICE {service_name}
                   IN COMPUTE POOL my_compute_pool
@@ -255,4 +258,4 @@ jobs:
 
           cs.close()
           conn.close()
-          
+          EOF
