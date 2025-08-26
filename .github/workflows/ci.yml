@@ -123,6 +123,9 @@
 
 
 
+
+
+
 name: Calculator App CI/CD to Snowflake
 
 on:
@@ -131,60 +134,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set Version Tag
-        id: vars
+      - name: Set up Python and SnowSQL
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - run: pip install snowflake-cli
+
+      - name: Configure SnowSQL
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ROLE: ACCOUNTADMIN
+          SNOWFLAKE_WAREHOUSE: COMPUTE_WH
         run: |
-          VERSION_TAG="v${GITHUB_RUN_NUMBER}"
-          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
-          echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
+          snow sql -q "USE ROLE $SNOWFLAKE_ROLE; USE WAREHOUSE $SNOWFLAKE_WAREHOUSE;"
+          snow sql -q "PUT file://snowflake/COP_FINANCE/update.yaml @FINANCE.REPORT.SPECS OVERWRITE = TRUE;"
+        #   snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @FINANCE.REPORT.SPECS SPECIFICATION_FILE = 'update.yaml';"
+        #   snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
 
-      - name: Build Docker Image
-        run: |
-          echo "Building image: $IMAGE_NAME"
-          docker build --platform=linux/amd64 -t $IMAGE_NAME .
-
-      - name: Docker Login to Snowflake
-        run: |
-          echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
-          docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
-          -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
-
-      - name: Tag and Push Docker Image
-        run: |
-          REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
-          REPO_PATH="dash_db/dash_schema/image_repo_test"
-          FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
-
-          echo "Tagging image: $FULL_TAG"
-          docker tag $IMAGE_NAME $FULL_TAG
-          echo "Pushing image: $FULL_TAG"
-          docker push $FULL_TAG
-
-    #   - name: Setup Snowflake CLI
-    #     uses: snowflakedb/snowflake-cli-action@v1.5
-    #     with:
-    #       cli-version: "latest"
-    #       default-config-file-path: "config.toml"
-
-    #   - name: Check if Snowflake is reachable
-    #     run: |
-    #       curl -I https://kcb69289.us-west-2.snowflakecomputing.com || true
-
-    #   - name: Test Snowflake Connection
-    #     run: |
-    #       snow --version
-    #       snow connection test --debug
-
-    #   - name: Deploy to Snowflake
-    #     run: |
-    #       snow sql -q "USE ROLE DFPCL_KASMO_DS; USE WAREHOUSE DFPCL_KASMO_WH;"
-    #       snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
-    #       snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db.dash_schema.image_repo_test SPECIFICATION_FILE = 'update.yaml';"
-    #       snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
