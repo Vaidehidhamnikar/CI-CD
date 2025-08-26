@@ -1,3 +1,131 @@
+# # name: Calculator App CI/CD to Snowflake
+
+# # on:
+# #   push:
+# #     branches: [ "main" ]
+# #   workflow_dispatch:
+
+# # jobs:
+# #   build-and-push:
+# #     runs-on: ubuntu-latest
+
+# #     steps:
+# #       - name: Checkout Repository
+# #         uses: actions/checkout@v3
+
+# #       - name: Set Version Tag
+# #         id: vars
+# #         run: |
+# #           VERSION_TAG="v${GITHUB_RUN_NUMBER}"
+# #           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+# #           echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
+
+# #       - name: Build Docker Image
+# #         run: |
+# #           echo "Building image: $IMAGE_NAME"
+# #           docker build --platform=linux/amd64 -t $IMAGE_NAME .
+
+# #       - name: Docker Login to Snowflake
+# #         run: |
+# #           echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
+# #           docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
+# #           -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
+
+# #       - name: Tag and Push Docker Image
+# #         run: |
+# #           REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
+# #           REPO_PATH="dash_db/dash_schema/image_repo_test" # Update with your DB/Schema/Stage
+# #           FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
+
+# #           echo "Tagging image: $FULL_TAG"
+# #           docker tag $IMAGE_NAME $FULL_TAG
+# #           echo "Pushing image: $FULL_TAG"
+# #           docker push $FULL_TAG
+
+
+
+
+
+
+
+
+
+# # name: Calculator App CI/CD to Snowflake
+
+# # on:
+# #   push:
+# #     branches: [ "main" ]
+# #   workflow_dispatch:
+
+# # jobs:
+# #   build-and-push:
+# #     runs-on: ubuntu-latest
+
+# #     steps:
+# #       - name: Checkout Repository
+# #         uses: actions/checkout@v3
+
+# #       - name: Set Version Tag
+# #         id: vars
+# #         run: |
+# #           VERSION_TAG="v${GITHUB_RUN_NUMBER}"
+# #           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+# #           echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
+
+# #       - name: Build Docker Image
+# #         run: |
+# #           echo "Building image: $IMAGE_NAME"
+# #           docker build --platform=linux/amd64 -t $IMAGE_NAME .
+
+# #       - name: Docker Login to Snowflake
+# #         run: |
+# #           echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
+# #           docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
+# #           -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
+
+# #       - name: Tag and Push Docker Image
+# #         run: |
+# #           REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
+# #           REPO_PATH="dash_db/dash_schema/image_repo_test" # Update with your DB/Schema/Stage
+# #           FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
+
+# #           echo "Tagging image: $FULL_TAG"
+# #           docker tag $IMAGE_NAME $FULL_TAG
+# #           echo "Pushing image: $FULL_TAG"
+# #           docker push $FULL_TAG
+
+# #     #   - name: Install SnowSQL
+# #     #     run: |
+# #     #       sudo apt-get update
+# #     #       sudo apt-get install -y unzip curl
+# #     #       curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+# #     #       bash snowsql-1.2.24-linux_x86_64.bash
+# #     #       echo "$HOME/bin" >> $GITHUB_PATH
+
+# #       - name: Run Snowflake Commands
+# #         env:
+# #           SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+# #           SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER }}
+# #           SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+# #         # run: |
+# #         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
+# #         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
+# #         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
+# #         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+
+
+# #         run: |
+# #             snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
+# #             snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
+# #             snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
+# #             snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+
+
+
+
+
+
+
 # name: Calculator App CI/CD to Snowflake
 
 # on:
@@ -6,131 +134,44 @@
 #   workflow_dispatch:
 
 # jobs:
-#   build-and-push:
+#   build-and-deploy:
 #     runs-on: ubuntu-latest
 
 #     steps:
 #       - name: Checkout Repository
 #         uses: actions/checkout@v3
 
-#       - name: Set Version Tag
-#         id: vars
-#         run: |
-#           VERSION_TAG="v${GITHUB_RUN_NUMBER}"
-#           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
-#           echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
+#       - name: Set up Python and SnowSQL
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.x'
+#       - run: pip install snowflake-cli
 
-#       - name: Build Docker Image
-#         run: |
-#           echo "Building image: $IMAGE_NAME"
-#           docker build --platform=linux/amd64 -t $IMAGE_NAME .
-
-#       - name: Docker Login to Snowflake
-#         run: |
-#           echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
-#           docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
-#           -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
-
-#       - name: Tag and Push Docker Image
-#         run: |
-#           REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
-#           REPO_PATH="dash_db/dash_schema/image_repo_test" # Update with your DB/Schema/Stage
-#           FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
-
-#           echo "Tagging image: $FULL_TAG"
-#           docker tag $IMAGE_NAME $FULL_TAG
-#           echo "Pushing image: $FULL_TAG"
-#           docker push $FULL_TAG
-
-
-
-
-
-
-
-
-
-# name: Calculator App CI/CD to Snowflake
-
-# on:
-#   push:
-#     branches: [ "main" ]
-#   workflow_dispatch:
-
-# jobs:
-#   build-and-push:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-
-#       - name: Set Version Tag
-#         id: vars
-#         run: |
-#           VERSION_TAG="v${GITHUB_RUN_NUMBER}"
-#           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
-#           echo "IMAGE_NAME=calculator-app-$VERSION_TAG" >> $GITHUB_ENV
-
-#       - name: Build Docker Image
-#         run: |
-#           echo "Building image: $IMAGE_NAME"
-#           docker build --platform=linux/amd64 -t $IMAGE_NAME .
-
-#       - name: Docker Login to Snowflake
-#         run: |
-#           echo "${{ secrets.SNOWFLAKE_DOCKER_PASSWORD }}" | \
-#           docker login ubhovfa-kasmo-inc.registry.snowflakecomputing.com \
-#           -u ${{ secrets.SNOWFLAKE_DOCKER_USERNAME }} --password-stdin
-
-#       - name: Tag and Push Docker Image
-#         run: |
-#           REGISTRY="ubhovfa-kasmo-inc.registry.snowflakecomputing.com"
-#           REPO_PATH="dash_db/dash_schema/image_repo_test" # Update with your DB/Schema/Stage
-#           FULL_TAG="$REGISTRY/$REPO_PATH/$IMAGE_NAME"
-
-#           echo "Tagging image: $FULL_TAG"
-#           docker tag $IMAGE_NAME $FULL_TAG
-#           echo "Pushing image: $FULL_TAG"
-#           docker push $FULL_TAG
-
-#     #   - name: Install SnowSQL
-#     #     run: |
-#     #       sudo apt-get update
-#     #       sudo apt-get install -y unzip curl
-#     #       curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
-#     #       bash snowsql-1.2.24-linux_x86_64.bash
-#     #       echo "$HOME/bin" >> $GITHUB_PATH
-
-#       - name: Run Snowflake Commands
+#       - name: Configure SnowSQL
 #         env:
-#           SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-#           SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER }}
-#           SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-#         # run: |
-#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
-#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
-#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
-#         #   snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -p $SNOWSQL_PWD -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
-
-
+#           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+#           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+#           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+#           SNOWFLAKE_ROLE: ACCOUNTADMIN
+#           SNOWFLAKE_WAREHOUSE: COMPUTE_WH
 #         run: |
-#             snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE DASH_S;"
-#             snow sql -q "PUT file://.github/workflows/ci.yml @dash_db.dash_schema.image_repo_test OVERWRITE = TRUE;"
-#             snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @dash_db/dash_schema/image_repo_test SPECIFICATION_FILE = 'update.yaml';"
-#             snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+#           snowsql -c connection -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;"
+#         #   snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;"
+#         #   snowsql -c connection -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;"
+
+#         #   snow sql -q "PUT file://snowflake/COP_FINANCE/update.yaml @FINANCE.REPORT.SPECS OVERWRITE = TRUE;"
+#         #   snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @FINANCE.REPORT.SPECS SPECIFICATION_FILE = 'update.yaml';"
+#         #   snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
 
 
 
 
-
-
-
-name: Calculator App CI/CD to Snowflake
+name: Streamlit CDP CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -138,28 +179,80 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      # 1. Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python and SnowSQL
-        uses: actions/setup-python@v4
+      # 2. Log in to DockerHub (or GHCR)
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
         with:
-          python-version: '3.x'
-      - run: pip install snowflake-cli
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Configure SnowSQL
+      # 3. Build Docker image
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/streamlit-snowflake:latest
+          docker build -t $IMAGE_NAME .
+
+      # 4. Push image
+      - name: Push Docker image
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/streamlit-snowflake:latest
+          docker push $IMAGE_NAME
+
+      # 5. Deploy/alter Snowflake service
+      - name: Deploy Snowflake Service
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ROLE: ACCOUNTADMIN
-          SNOWFLAKE_WAREHOUSE: COMPUTE_WH
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+          IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/streamlit-snowflake:latest
         run: |
-          snowsql -c connection -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;"
-        #   snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;"
-        #   snowsql -c connection -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;"
+          python - <<'EOF'
+          import snowflake.connector
+          import os
 
-        #   snow sql -q "PUT file://snowflake/COP_FINANCE/update.yaml @FINANCE.REPORT.SPECS OVERWRITE = TRUE;"
-        #   snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @FINANCE.REPORT.SPECS SPECIFICATION_FILE = 'update.yaml';"
-        #   snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
+          conn = snowflake.connector.connect(
+              account=os.getenv("SNOWFLAKE_ACCOUNT"),
+              user=os.getenv("SNOWFLAKE_USER"),
+              password=os.getenv("SNOWFLAKE_PASSWORD"),
+              role=os.getenv("SNOWFLAKE_ROLE"),
+              warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
+              database=os.getenv("SNOWFLAKE_DATABASE"),
+              schema=os.getenv("SNOWFLAKE_SCHEMA")
+          )
+          cs = conn.cursor()
 
+          service_name = "STREAMLIT_APP"
+          image_url = os.getenv("IMAGE_NAME")
+
+          # Try alter first, else create
+          try:
+              cs.execute(f"ALTER SERVICE {service_name} SET IMAGE = '{image_url}'")
+              print("Service altered successfully.")
+          except:
+              cs.execute(f"""
+                  CREATE SERVICE {service_name}
+                  IN COMPUTE POOL my_compute_pool
+                  FROM SPECIFICATION $$
+                  containers:
+                    - name: streamlit
+                      image: {image_url}
+                      args: ["streamlit", "run", "streamlit.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+                  endpoints:
+                    - name: httpendpoint
+                      port: 8501
+                      public: true
+                  $$;
+              """)
+              print("Service created successfully.")
+
+          cs.close()
+          conn.close()
+          EOF
