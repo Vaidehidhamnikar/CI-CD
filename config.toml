@@ -1,6 +1,0 @@
-default_connection_name = "MY_CONNECTION"
-
-[connections.my_connection]
-account = "kcb69289"
-user = "VAIDEHI"
-password = "Kasmodigital@123"
