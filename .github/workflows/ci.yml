@@ -155,7 +155,7 @@ jobs:
           SNOWFLAKE_ROLE: ACCOUNTADMIN
           SNOWFLAKE_WAREHOUSE: COMPUTE_WH
         run: |
-          snow sql -q "USE ROLE $SNOWFLAKE_ROLE; USE WAREHOUSE $SNOWFLAKE_WAREHOUSE;"
+          snow sql -q "USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;"
           snow sql -q "PUT file://snowflake/COP_FINANCE/update.yaml @FINANCE.REPORT.SPECS OVERWRITE = TRUE;"
         #   snow sql -q "ALTER SERVICE CI_CD_SERVICE FROM @FINANCE.REPORT.SPECS SPECIFICATION_FILE = 'update.yaml';"
         #   snow sql -q "ALTER SERVICE CI_CD_SERVICE RESUME;"
