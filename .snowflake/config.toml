@@ -1,6 +1,8 @@
-default_connection_name = "my_connection"
-
-[connections.my_connection]
+[connections.connection]
 account = "kcb69289"
 user = "VAIDEHI"
-password = "Kasmodigital@123"
+password = "Kasmodigital"   # or use key-pair / SSO
+role = "ACCOUNTADMIN"
+warehouse = "COMPUTE_WH"
+database = "DASH_DB"
+schema = "DASH_SCHEMA"
