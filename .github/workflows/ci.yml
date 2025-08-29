@@ -262,11 +262,11 @@ jobs:
 
 
           
-      # - name: Setup Snowflake CLI
-      #   uses: snowflakedb/snowflake-cli-action@v1.5
-      #   with:
-      #     cli-version: "latest"
-      #     default-config-file-path: "config.toml"
+      - name: Setup Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v1.5
+        with:
+          cli-version: "latest"
+          default-config-file-path: "config.toml"
 
       - name: Check if Snowflake is reachable
         run: |
