@@ -66,8 +66,8 @@ def connection() -> snowflake.connector.SnowflakeConnection:
         # Username/password-based authentication (local/dev)
         creds = {
             "account": os.getenv("SNOWFLAKE_ACCOUNT", "kcb69289"),
-            "user": os.getenv("SNOWFLAKE_USER", "####"),
-            "password": os.getenv("SNOWFLAKE_PASSWORD", ""),
+            "user": os.getenv("SNOWFLAKE_USER", "VAIDEHI"),
+            "password": os.getenv("SNOWFLAKE_PASSWORD", "Kasmodigital@123"),
             "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH"),
             "database": os.getenv("SNOWFLAKE_DATABASE", "DASH_DB"),
             "schema": os.getenv("SNOWFLAKE_SCHEMA", "DASH_SCHEMA"),
